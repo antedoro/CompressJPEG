@@ -17,18 +17,32 @@
         }
         .drop-area.highlight { background-color: #e0e0e0; }
         .file-info { margin-top: 10px; }
+        
+        .compress-btn {
+            background-color: #d32f2f;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        
+        .compress-btn:hover {
+            background-color: #b71c1c;
+        }
     </style>
 </head>
 <body>
     <h2>Simple Image Compressor</h2>
+    <button onclick="compressImages()" id="compress-btn" class="compress-btn">Compress</button>
     <div class="drop-area" id="drop-area">Drag & Drop Images Here or Click to Upload</div>
     <input type="file" id="upload" accept="image/jpeg, image/png" multiple style="display: none;">
     <br>
     <label>Quality (1-100): <input type="number" id="quality" value="70" min="1" max="100"></label>
     <br>
     <div id="file-list"></div>
-    <br>
-    <button onclick="compressImages()" id="compress-btn" style="display: none;">Compress</button>
     <br>
     <div id="output-container"></div>
     <a id="download-zip" style="display: none;" download="compressed_images.zip">Download All as ZIP</a>
@@ -64,7 +78,6 @@
             files.forEach(file => {
                 fileList.innerHTML += `<p>${file.name} - ${(file.size / 1024).toFixed(2)} KB</p>`;
             });
-            compressBtn.style.display = "block";
         }
 
         function compressImages() {
