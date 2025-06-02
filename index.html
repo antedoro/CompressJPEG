@@ -5,17 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Compressor</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 2em;
+        }
+        p {
+            color: #555;
+        }
         input, button { margin: 10px; }
         img { max-width: 100%; margin-top: 10px; display: block; }
         .drop-area {
+            width: 100%;
+            max-width: 500px;
+            height: 150px;
+            max-width: 500px;
             border: 2px dashed #ccc;
             padding: 20px;
-            margin: 10px;
+            margin: 20px auto;
             cursor: pointer;
             background-color: #f9f9f9;
         }
-        .drop-area.highlight { background-color: #e0e0e0; }
+        .drop-area.highlight { 
+            background-color: #e0e0e0;
+            border-color: #666;
+        } }
         .file-info { margin-top: 10px; }
         
         .compress-btn {
@@ -32,18 +50,61 @@
         .compress-btn:hover {
             background-color: #b71c1c;
         }
+    
+        .file-list-container {
+            max-width: 500px;
+            margin: 0px auto;
+            background: white;
+            border-radius: 8px;
+            padding: 0px;  /* reduced padding */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 8px;  /* reduced padding */
+            border-bottom: 1px solid #eee;
+            font-size: 14px;  /* smaller text */
+            min-height: 32px;  /* fixed height for consistency */
+        }
+        
+        .file-item:last-child {
+            border-bottom: none;
+        }
+        
+        .remove-btn {
+            background-color: #ff0000;
+            color: white;
+            border: none;
+            padding: 4px 12px;  /* reduced padding */
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;  /* smaller button text */
+            line-height: 1;
+        }
+        
+        .file-item span {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-right: 10px;
+        }
     </style>
 </head>
 <body>
-    <h2>Simple Image Compressor</h2>
-    <button onclick="compressImages()" id="compress-btn" class="compress-btn">Compress</button>
-    <div class="drop-area" id="drop-area">Drag & Drop Images Here or Click to Upload</div>
+    <h1>Simple Image Compressor</h1>
+    <p>Compress images in the order you want with the easiest JPG merger available.</p>
+    <button onclick="fileInput.click()" class="compress-btn">Select Images</button>
     <input type="file" id="upload" accept="image/jpeg, image/png" multiple style="display: none;">
+    <div class="drop-area" id="drop-area">Drag & Drop Images Here or Click to Upload</div>
     <br>
     <label>Quality (1-100): <input type="number" id="quality" value="70" min="1" max="100"></label>
     <br>
-    <div id="file-list"></div>
+    <div id="file-list" class="file-list-container"></div>
     <br>
+    <button onclick="compressImages()" id="compress-btn" class="compress-btn">Compress</button>
     <div id="output-container"></div>
     <a id="download-zip" style="display: none;" download="compressed_images.zip">Download All as ZIP</a>
     
@@ -63,20 +124,44 @@
         dropArea.addEventListener("drop", (event) => {
             event.preventDefault();
             dropArea.classList.remove("highlight");
-            files = Array.from(event.dataTransfer.files);
+            const newFiles = Array.from(event.dataTransfer.files);
+            files = [...files, ...newFiles]; // Append new files to existing array
             displayFileList();
+            // Clear the output container and zip download link
+            document.getElementById("output-container").innerHTML = "";
+            document.getElementById("download-zip").style.display = "none";
         });
 
         fileInput.addEventListener("change", (event) => {
-            files = Array.from(event.target.files);
+            const newFiles = Array.from(event.target.files);
+            files = [...files, ...newFiles]; // Append new files to existing array
             displayFileList();
+            // Clear the output container and zip download link
+            document.getElementById("output-container").innerHTML = "";
+            document.getElementById("download-zip").style.display = "none";
+            // Reset file input
+            fileInput.value = '';
         });
+
+        function removeFile(index) {
+            files.splice(index, 1);
+            displayFileList();
+            if (files.length === 0) {
+                fileList.innerHTML = ''; // Clear the list if no files
+            }
+        }
 
         function displayFileList() {
             if (files.length === 0) return;
-            fileList.innerHTML = "<h3>Files to Compress:</h3>";
-            files.forEach(file => {
-                fileList.innerHTML += `<p>${file.name} - ${(file.size / 1024).toFixed(2)} KB</p>`;
+            fileList.innerHTML = '';  // Remove the heading
+            files.forEach((file, index) => {
+                const fileItem = document.createElement("div");
+                fileItem.className = "file-item";
+                fileItem.innerHTML = `
+                    <span>${file.name} - ${(file.size / 1024).toFixed(2)} KB</span>
+                    <button class="remove-btn" onclick="removeFile(${index})">Remove</button>
+                `;
+                fileList.appendChild(fileItem);
             });
         }
 
